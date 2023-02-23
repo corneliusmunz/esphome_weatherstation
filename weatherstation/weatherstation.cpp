@@ -2,6 +2,9 @@
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
 
+#include "WeatherSensorCfg.h"
+#include "WeatherSensor.h"
+
 namespace esphome {
 namespace weatherstation {
 

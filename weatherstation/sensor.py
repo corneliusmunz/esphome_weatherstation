@@ -47,6 +47,9 @@ async def to_code(config):
     await cg.register_component(var, config)
     cg.add_library("SPI", None)
     cg.add_library("RadioLib", "5.6.0")
+    cg.add_library("BresserWeatherSensorReceiver", "0.5.4")
+    cg.add_library("MQTT", "2.5.1")
+    cg.add_library("ArduinoJson", "6.20.1")
 
 
     if CONF_TEMPERATURE in config:
