@@ -45,6 +45,7 @@ CONFIG_SCHEMA = (
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
+    cg.add_library("SPI", None)
     cg.add_library("RadioLib", "5.6.0")
 
 
@@ -58,5 +59,3 @@ async def to_code(config):
         conf = config[CONF_HUMIDITY]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_humidity_sensor(sens))
-
-
