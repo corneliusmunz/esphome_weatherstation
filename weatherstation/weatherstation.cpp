@@ -31,6 +31,15 @@ void WeatherStationComponent::setup()
   void WeatherStationComponent::update()
   {
     ESP_LOGD(TAG, "WeatherStation update");
+    int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
+    if (state == RADIOLIB_ERR_NONE)
+    {
+      ESP_LOGD(TAG, "Radio successfully configured");
+    }
+    else
+    {
+      ESP_LOGD(TAG, "Radio initialization failed");
+    }
     this->temperature_sensor_->publish_state(12.3);
     this->humidity_sensor_->publish_state(34.5);
   }
