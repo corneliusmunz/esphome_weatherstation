@@ -39,16 +39,16 @@ namespace esphome
 
     float WeatherStationComponent::get_setup_priority() const { return setup_priority::DATA; }
 
-    void WeatherStationComponent::update()
+    void WeatherStationComponent::loop()
     {
 
       ESP_LOGD(TAG, "WeatherStation update");
 
       this->clearSlots();
-      //int decode_status = this->getMessage();
-      bool decode_ok = this->getData(80000, DATA_COMPLETE);
+      int decode_status = this->getMessage();
+      //bool decode_ok = this->getData(80000, DATA_COMPLETE);
 
-      if (decode_ok)
+      if (decode_status == 0)
       {
         ESP_LOGD(TAG, "WeatherSensor successfully configured");
         this->temperature_sensor_->publish_state(sensor[0].temp_c);

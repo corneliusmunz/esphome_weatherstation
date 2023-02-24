@@ -23,7 +23,7 @@ DEPENDENCIES = []
 weatherstation_ns = cg.esphome_ns.namespace("weatherstation")
 
 WeatherStationComponent = weatherstation_ns.class_(
-    "WeatherStationComponent", cg.PollingComponent
+    "WeatherStationComponent", cg.Component
 )
 
 CONFIG_SCHEMA = (
@@ -60,7 +60,7 @@ CONFIG_SCHEMA = (
                 state_class=STATE_CLASS_MEASUREMENT
             )
         }
-    ).extend(cv.polling_component_schema("120s"))
+    )
     #.extend(cv.polling_component_schema("10s"))
 )
 

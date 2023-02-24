@@ -143,7 +143,7 @@ namespace esphome
     } SensorMap;
 
     /// This class implements support for the BME280 Temperature+Pressure+Humidity i2c sensor.
-    class WeatherStationComponent : public PollingComponent
+    class WeatherStationComponent : public Component
     {
     public:
       // ========== INTERNAL METHODS ==========
@@ -157,7 +157,7 @@ namespace esphome
 
       float get_setup_priority() const override;
       void dump_config() override;
-      void update() override;
+      void loop() override;
 
       struct Sensor
       {
