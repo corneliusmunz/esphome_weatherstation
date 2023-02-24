@@ -20,6 +20,8 @@ namespace esphome
     void WeatherStationComponent::setup()
     {
       ESP_LOGCONFIG(TAG, "Setting up Weatherstation...");
+      this->begin();
+
       // int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
       // if (state == RADIOLIB_ERR_NONE)
       // {
@@ -27,7 +29,7 @@ namespace esphome
       // } else {
       //   ESP_LOGD(TAG, "Radio initialization failed");
       // }
-      //weatherSensor.begin();
+      ESP_LOGCONFIG(TAG, "Finish Setting up Weatherstation...");
     }
 
     void WeatherStationComponent::dump_config()
@@ -39,7 +41,58 @@ namespace esphome
 
     void WeatherStationComponent::update()
     {
+
       ESP_LOGD(TAG, "WeatherStation update");
+
+      this->clearSlots();
+      //int decode_status = this->getMessage();
+      bool decode_ok = this->getData(80000, DATA_COMPLETE);
+
+      if (decode_ok)
+      {
+        ESP_LOGD(TAG, "WeatherSensor successfully configured");
+        this->temperature_sensor_->publish_state(sensor[0].temp_c);
+        this->humidity_sensor_->publish_state(sensor[0].humidity);
+        this->windspeed_sensor_->publish_state(sensor[0].wind_avg_meter_sec * 3.6);
+        this->winddirection_sensor_->publish_state(sensor[0].wind_direction_deg);
+        this->rain_sensor_->publish_state(sensor[0].rain_mm);
+      }
+      else
+      {
+        //ESP_LOGD(TAG, "WeatherSensor initialization failed with code %d", decode_status);
+        ESP_LOGD(TAG, "WeatherSensor initialization failed");
+      }
+
+      // this->temperature_sensor_->publish_state(12.3);
+      // this->humidity_sensor_->publish_state(45.6);
+      // this->windspeed_sensor_->publish_state(7.1);
+      // this->winddirection_sensor_->publish_state(10.7);
+
+      // This example uses only a single slot in the sensor data array
+      // int const i = 0;
+
+      // // Clear all sensor data
+      // this->clearSlots();
+
+      // // Tries to receive radio message (non-blocking) and to decode it.
+      // // Timeout occurs after a small multiple of expected time-on-air.
+      // //int decode_status = this->getMessage();
+      // bool decode_ok = this->getData(60000, DATA_COMPLETE);
+
+      // //if (decode_status == 0)
+      // if (decode_ok)
+      // {
+      //   ESP_LOGD(TAG, "WeatherSensor successfully configured");
+      //   this->temperature_sensor_->publish_state(sensor[0].temp_c);
+      //   this->humidity_sensor_->publish_state(sensor[0].humidity);
+      // }
+      // else
+      // {
+      //   //ESP_LOGD(TAG, "WeatherSensor initialization failed with code %d", decode_status);
+      //   ESP_LOGD(TAG, "WeatherSensor initialization failed");
+
+      // }
+
       // int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
       // if (state == RADIOLIB_ERR_NONE)
       // {
@@ -66,8 +119,8 @@ namespace esphome
       //   ESP_LOGD(TAG, "WeatherSensor initialization failed");
       // }
 
-      this->temperature_sensor_->publish_state(12.3);
-      this->humidity_sensor_->publish_state(34.5);
+      //this->temperature_sensor_->publish_state(12.3);
+      //this->humidity_sensor_->publish_state(34.5);
     }
 
     int16_t WeatherStationComponent::begin(void)
@@ -202,7 +255,10 @@ namespace esphome
       //     4. flush RX buffer
       //     5. switch to standby
       int state = radio.receive(recvData, 27);
+      ESP_LOGD(TAG, "radio receive state %d", state);
+
       rssi = radio.getRSSI();
+      ESP_LOGD(TAG, "radio receive rssi %f", rssi);
 
       if (state == RADIOLIB_ERR_NONE)
       {
@@ -223,7 +279,7 @@ namespace esphome
         } // if (recvData[0] == 0xD4)
         else if (state == RADIOLIB_ERR_RX_TIMEOUT)
         {
-          ESP_LOGV(TAG, "T");
+          ESP_LOGD(TAG, "T");
         } // if (state == RADIOLIB_ERR_RX_TIMEOUT)
         else
         {
@@ -602,9 +658,11 @@ namespace esphome
       sensor[slot].uv_ok |= uv_ok;
       sensor[slot].wind_ok |= wind_ok;
       sensor[slot].rain_ok |= rain_ok;
+
       sensor[slot].moisture_ok |= moisture_ok;
 
       ESP_LOGD(TAG, "Temp: %d  Hum: %d  UV: %d  Wind: %d  Rain: %d  Moist: %d", temp_ok, humidity_ok, uv_ok, wind_ok, rain_ok, moisture_ok);
+      ESP_LOGD(TAG, "Temp: %f  Hum: %f Wind: %f", sensor[slot].temp_c, sensor[slot].humidity, sensor[slot].wind_gust_meter_sec);
 
       sensor[slot].valid = true;
 

@@ -2,8 +2,8 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/sensor/sensor.h"
-#include "Arduino.h"
-#include "string"
+//#include "Arduino.h"
+//#include "string"
 #include "RadioLib.h"
 
 // Sensor Types
@@ -16,6 +16,7 @@
 // ? - Water Leakage Sensor
 // ? - Pool Thermometer
 // ? - Lightning Sensor
+
 #define SENSOR_TYPE_WEATHER0 0     // Weather Station
 #define SENSOR_TYPE_WEATHER1 1     // Weather Station
 #define SENSOR_TYPE_THERMO_HYGRO 2 // Thermo-/Hygro-Sensor
@@ -33,6 +34,8 @@
 
 #define NUM_SENSORS 1
 
+#define USE_CC1101
+
 // List of sensor IDs to be excluded - can be empty
 #define SENSOR_IDS_EXC \
   {                    \
@@ -43,6 +46,78 @@
 #define SENSOR_IDS_INC \
   {                    \
   }
+//#define SENSOR_IDS_INC { 0x83750871 }
+
+#if defined(ESP8266)
+#define ARDUHAL_LOG_LEVEL_NONE 0
+#define ARDUHAL_LOG_LEVEL_ERROR 1
+#define ARDUHAL_LOG_LEVEL_WARN 2
+#define ARDUHAL_LOG_LEVEL_INFO 3
+#define ARDUHAL_LOG_LEVEL_DEBUG 4
+#define ARDUHAL_LOG_LEVEL_VERBOSE 5
+
+// Set desired level here!
+#define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_VERBOSE
+
+#if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
+#define log_e(...)                      \
+  {                                     \
+    DEBUG_ESP_PORT.printf(__VA_ARGS__); \
+    DEBUG_ESP_PORT.println();           \
+  }
+#else
+#define log_e(...) \
+  {                \
+  }
+#endif
+#if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
+#define log_w(...)                      \
+  {                                     \
+    DEBUG_ESP_PORT.printf(__VA_ARGS__); \
+    DEBUG_ESP_PORT.println();           \
+  }
+#else
+#define log_w(...) \
+  {                \
+  }
+#endif
+#if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
+#define log_i(...)                      \
+  {                                     \
+    DEBUG_ESP_PORT.printf(__VA_ARGS__); \
+    DEBUG_ESP_PORT.println();           \
+  }
+#else
+#define log_i(...) \
+  {                \
+  }
+#endif
+#if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
+#define log_d(...)                      \
+  {                                     \
+    DEBUG_ESP_PORT.printf(__VA_ARGS__); \
+    DEBUG_ESP_PORT.println();           \
+  }
+#else
+#define log_d(...) \
+  {                \
+  }
+#endif
+#if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
+#define log_v(...)                      \
+  {                                     \
+    DEBUG_ESP_PORT.printf(__VA_ARGS__); \
+    DEBUG_ESP_PORT.println();           \
+  }
+#else
+#define log_v(...) \
+  {                \
+  }
+#endif
+
+#endif
+
+#define RECEIVER_CHIP "[CC1101]"
 
 namespace esphome
 {
@@ -76,6 +151,9 @@ namespace esphome
       void setup() override;
       void set_temperature_sensor(sensor::Sensor *temperature_sensor) { temperature_sensor_ = temperature_sensor; }
       void set_humidity_sensor(sensor::Sensor *humidity_sensor) { humidity_sensor_ = humidity_sensor; }
+      void set_wind_speed_sensor(sensor::Sensor *windspeed_sensor) { windspeed_sensor_ = windspeed_sensor; }
+      void set_wind_direction_sensor(sensor::Sensor *winddirection_sensor) { winddirection_sensor_ = winddirection_sensor; }
+      void set_rain_sensor(sensor::Sensor *rain_sensor) { rain_sensor_ = rain_sensor; }
 
       float get_setup_priority() const override;
       void dump_config() override;
@@ -113,6 +191,9 @@ namespace esphome
     protected:
       sensor::Sensor *temperature_sensor_{nullptr};
       sensor::Sensor *humidity_sensor_{nullptr};
+      sensor::Sensor *windspeed_sensor_{nullptr};
+      sensor::Sensor *winddirection_sensor_{nullptr};
+      sensor::Sensor *rain_sensor_{nullptr};
 
     private:
       int16_t begin(void);

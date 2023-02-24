@@ -5,11 +5,17 @@ from esphome.const import (
     CONF_HUMIDITY,
     CONF_ID,
     CONF_TEMPERATURE,
+    CONF_WIND_SPEED,
+    CONF_WIND_DIRECTION_DEGREES,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
     STATE_CLASS_MEASUREMENT,
     UNIT_CELSIUS,
     UNIT_PERCENT,
+    UNIT_KILOMETER_PER_HOUR,
+    ICON_SIGN_DIRECTION,
+    ICON_WEATHER_WINDY,
+    UNIT_DEGREES
 )
 
 DEPENDENCIES = []
@@ -35,10 +41,27 @@ CONFIG_SCHEMA = (
                 accuracy_decimals=1,
                 device_class=DEVICE_CLASS_HUMIDITY,
                 state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_WIND_SPEED): sensor.sensor_schema(
+                unit_of_measurement=UNIT_KILOMETER_PER_HOUR,
+                icon=ICON_WEATHER_WINDY,
+                accuracy_decimals=1,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_WIND_DIRECTION_DEGREES): sensor.sensor_schema(
+                unit_of_measurement=UNIT_DEGREES,
+                icon=ICON_SIGN_DIRECTION,
+                accuracy_decimals=1,
+                state_class=STATE_CLASS_MEASUREMENT
+            ),
+            cv.Optional("rain"): sensor.sensor_schema(
+                unit_of_measurement="mm",
+                accuracy_decimals=1,
+                state_class=STATE_CLASS_MEASUREMENT
             )
         }
-    )
-    .extend(cv.polling_component_schema("10s"))
+    ).extend(cv.polling_component_schema("120s"))
+    #.extend(cv.polling_component_schema("10s"))
 )
 
 
@@ -59,3 +82,18 @@ async def to_code(config):
         conf = config[CONF_HUMIDITY]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_humidity_sensor(sens))
+
+    if CONF_WIND_SPEED in config:
+        conf = config[CONF_WIND_SPEED]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_wind_speed_sensor(sens))
+
+    if CONF_WIND_DIRECTION_DEGREES in config:
+        conf = config[CONF_WIND_DIRECTION_DEGREES]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_wind_direction_sensor(sens))
+
+    if "rain" in config:
+        conf = config["rain"]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_rain_sensor(sens))
